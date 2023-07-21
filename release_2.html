@@ -1,0 +1,1282 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>工会管理平台</title>
+		<link rel="stylesheet" href="../css/elm.css">
+		<link rel="stylesheet" href="../css/common.css">
+		<link rel="stylesheet" type="text/css" href="../css/index.css" />
+		<link rel="stylesheet" href="../css/news.css">
+		<link rel="stylesheet" href="../css/layer.css">
+		<style>
+			.columnnum {
+				color: #252525;
+			}
+			
+			.activenews {
+				color: #B74343;
+			}
+			html,
+			body {
+				overflow: hidden;
+				/* width: 100%; */
+				height: 100%;
+				font-family: PingFangSC-Regular, PingFang SC;
+				color: #333;
+				/* font-size: 12px; */
+				background: #FFFFFF !important;
+			}
+			.warp{
+				margin: 10px;
+				height: calc(100vh - 60px);
+				box-shadow: 0px 0px 2px 1px rgba(215, 215, 215, 0.35);
+				border-radius: 9px;
+				padding: 10px;
+				overflow-y:auto;
+				/* overflow: hidden; */
+				/* width: 100%; */
+			}
+			.release_title_p{
+				color: #000000;
+				font-size: 14px;
+				width: 65px;
+				text-align: right;
+				margin-right: 10px;
+				font-weight: 500;
+			}
+			.selWidth {
+              width: 160px;
+			  height: 28px;
+	          }
+			  .el-input__icon{
+				  line-height: 28px;
+			  }
+			  .el-input__inner{
+				 height: 28px;
+			  }
+	        .el-date-editor.el-input, .el-date-editor.el-input__inner {
+            width: 160px;
+              }
+			  .resAadSug{
+				  /* text-align: left; */
+				  text-overflow: ellipsis;
+				  display: -webkit-box;
+				  -webkit-line-clamp: 2;
+				  -webkit-box-orient: vertical;
+				  overflow: hidden;
+			  }
+			  .marleft1{
+			  	margin-left: 10px;
+			  }
+			  .el-table__body .cell{
+				  padding-top: 5px;
+				  padding-bottom: 5px;
+			  }
+			  .blue_title{
+				 color: #606266;
+				 display: flex;
+				 justify-content: center;
+				 align-items: center;
+			  }
+			  .red_title{
+				  color: #B74343;
+				  display: flex;
+				  justify-content: center;
+				  align-items: center;
+			  }
+			  .position_auditType{
+				  margin-right: 10px;
+			  }
+			  .marbottom1 .search_btn{
+				width: 80px;
+				height: 28px;
+				line-height: 28px;
+				text-align: center;
+				border-radius: 2px;
+				font-size: 14px;
+				cursor: pointer;
+			  }
+		</style>
+	</head>
+	<body>
+		<div id="shopx5" v-cloak>
+			<div class="warp">
+				<!-- <el-card class="box-card martop1"> -->
+				<div class="clearfix">
+					<div class="columnTitle marleft1"> 
+						<span class="columnnum fontSize16" @click="chooseTitle(2)" :class="titleId==2?'activenews':''">统计报表（年）</span>
+						<span v-if="false" class="columnnum fontSize16" @click="chooseTitle(1)" :class="titleId==1?'activenews':''">统计报表（月）</span>
+					</div>
+				</div>
+				<div style="margin-top: 10px;border-top: 1px solid #EAEAEA;">
+					
+					<div v-if="titleId==2" style="padding-top: 20px;">
+						<el-form inline size="small" class='marbottom1 marleft1'>
+							<div class="marbottom1">
+                                <el-radio-group v-model="statisticalForm.groupId" size="mini" @change="changeGroup">
+                                    <el-radio-button label="0" border>所有</el-radio-button>
+                                    <el-radio-button :label="item.Id" border v-for="(item, index) in groups" >{{item.Name}}</el-radio-button>
+                                </el-radio-group>
+                            </div>
+							<div class='flex-start'><span>年份：</span>
+								<el-date-picker v-model="statisticalForm.year" type="year" placeholder="选择年" format="yyyy" value-format="yyyy" :clearable="false" >
+								</el-date-picker>
+								<div class="release_blue relase_all margin_left10 search_btn" @click="getStatisticaData('search')">
+									查询</div>
+								<div class="margin_left10 release_bor_bl relase_all search_btn" @click="statisticaExport">导出</div>
+							</div>
+						</el-form>
+						<div style="width: 100%;">
+							<el-table :data="statisticalList.data" tooltip-effect="dark" :header-cell-style="{background:'#FAFAFA'}" :key='2'>
+								<el-table-column prop="index" label="序号" min-width="50" align="center">
+									<template slot-scope="scope">
+										{{statisticalForm.pageIndex * statisticalForm.pageSize + scope.$index + 1}}
+									</template>
+								</el-table-column>
+								<el-table-column prop="OrgName" label="所属单位"  show-overflow-tooltip min-width="100">
+								</el-table-column>
+								<el-table-column sortable prop="UserName" label="姓名" align="center" show-overflow-tooltip min-width="70">
+								</el-table-column>
+								<el-table-column sortable prop="Month1" label="一月" show-overflow-tooltip align="center" min-width="50">
+								</el-table-column>
+								<el-table-column sortable prop="Month2" label="二月" align="center" show-overflow-tooltip min-width="50">
+								</el-table-column>
+								<el-table-column sortable prop="Month3" label="三月"  align="center" show-overflow-tooltip min-width="50"> 
+								</el-table-column>
+								<el-table-column sortable prop="Month4" label="四月"  align="center" show-overflow-tooltip min-width="50">
+								</el-table-column>
+								<el-table-column sortable prop="Month5" label="五月"  align="center" show-overflow-tooltip min-width="50">
+								</el-table-column>
+								<el-table-column sortable prop="Month6" label="六月"  align="center" show-overflow-tooltip min-width="50">
+								</el-table-column>
+								<el-table-column sortable prop="Month7" label="七月" align="center" show-overflow-tooltip min-width="50">
+								</el-table-column>
+								<el-table-column sortable prop="Month8" label="八月"  align="center" show-overflow-tooltip min-width="50">
+								</el-table-column>
+								<el-table-column sortable prop="Month9" label="九月" align="center" show-overflow-tooltip min-width="50">
+								</el-table-column>
+								<el-table-column sortable prop="Month10" label="十月"  align="center" show-overflow-tooltip min-width="50">
+								</el-table-column>
+								<el-table-column sortable prop="Month11" label="十一月" align="center" show-overflow-tooltip min-width="50">
+								</el-table-column>
+								<el-table-column sortable prop="Month12" label="十二月"  align="center" show-overflow-tooltip min-width="50">
+								</el-table-column>
+								<el-table-column sortable prop="MonthSum" label="总计" align="center" show-overflow-tooltip min-width="50">
+								</el-table-column>
+							</el-table>
+						</div>
+						<!-- 分页 -->
+						<!--<div class="block">
+							<el-pagination @size-change="handleStatisticalSizeChange" @current-change="handleStatisticalCurrentChange"
+							 background :current-page="StatisticalPage" :page-sizes="[200]" :page-size="statisticalForm.PageSize"
+							 layout="total, sizes, prev, pager, next, jumper" :total="statisticalList.total">
+							</el-pagination>
+						</div>-->
+					</div>
+
+					<div v-if="titleId==1" style="padding-top: 20px;">
+					 
+						<el-form inline size="small" class='marbottom1 marleft1'>
+						 
+							<div class='flex-start'>
+								选择年份：<el-date-picker v-model="statisticalFormMonth.year" type="year" placeholder="选择年" format="yyyy" value-format="yyyy">
+								</el-date-picker>
+								&nbsp;&nbsp;选择月份：
+								
+								<el-select v-model="statisticalFormMonth.month" placeholder="请选择" class="selWidth" clearable>
+									<el-option   value="1"  label="1"></el-option>
+									<el-option   value="2"  label="2"></el-option>
+									<el-option   value="3"  label="3"></el-option>
+									<el-option   value="4"  label="4"></el-option>
+									<el-option   value="5"  label="5"></el-option>
+									<el-option   value="6"  label="6"></el-option>
+									<el-option   value="7"  label="7"></el-option>
+									<el-option   value="8"  label="8"></el-option>
+									<el-option   value="9"  label="9"></el-option>
+									<el-option   value="10"  label="10"></el-option>
+									<el-option   value="11"  label="11"></el-option>
+									<el-option   value="12"  label="12"></el-option>
+								</el-select>
+								
+								<div class="release_blue relase_all margin_left10 search_btn" @click="getStatisticaMonthData()">
+									查询</div>
+								 <div class="margin_left10 release_bor_bl relase_all search_btn" @click="statisticaExportMonth">导出</div> 
+							</div>
+						</el-form>
+						<div style="width: 100%;">
+
+							<el-table :data="statisticalListMonth.data" tooltip-effect="dark" :header-cell-style="{background:'#FAFAFA'}" :key='2'>
+								
+								<!-- <el-table-column prop="UserName" label="姓名" align="center" show-overflow-tooltip min-width="70">
+								</el-table-column> -->
+								
+								<el-table-column v-for="(item, index) in statisticalListMonth.data.columns" width="150px"								 
+								:prop="item.value" :label="item.label">
+			   					</el-table-column> 
+
+							</el-table>
+						</div>
+					
+
+					</div>
+					
+				</div>
+
+				<!-- </el-card> -->
+			</div>
+			<div class="mg_attention" v-show="trialLoading">
+				<div class="mask_bg"></div>
+				<div class="trial_attention_cont mg_formadd">
+					<img src="../img/mask2.png" alt="" class="mgmask_close" @click="closeBtn">
+					<div class="mg_attention_tit" v-if="number==0">提交初审</div>
+					<div class="mg_attention_tit" v-if="number==1">审核通过</div>
+					<div class="mg_attention_tit" v-if="number==3">撤回</div>
+					<el-form ref="editPram" label-width="84px" :model="form" class='martop1'>
+						<div class="sure_trial" v-if="number==0">是否确认提交初审？</div>
+						<div class="sure_trial" v-if="number==1">是否确认审核通过？</div>
+						<div class="sure_trial" v-if="number==3">是否确认撤回？</div>
+						<el-form-item>
+							<div class="flex-start button_trial" id="dialog_bottom">
+								<div class='mg_cancel' @click="trialLoading=false">取消</div>
+								<div class='mg_keep' @click="getAudit">确认</div>
+							</div>
+						</el-form-item>
+					</el-form>
+				</div>
+			</div>
+		</div>
+
+	</body>
+	<!-- <script src="https://cdn.bootcss.com/babel-polyfill/7.6.0/polyfill.js"></script> -->
+	<script src="../js/polyfill.js" type="text/javascript"></script>
+	<script src="../js/moment.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../js/common.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../js/jquery.js" type="text/javascript"></script>
+	<script src="../js/vue.min.js" charset="utf-8"></script>
+	<script>
+		Vue.config.productionTip = false
+		moment.suppressDeprecationWarnings = true;
+	</script>
+	<script src="../js/element.js" charset="utf-8"></script>
+	<script src="../js/layer.js" charset="utf-8"></script>
+	<!-- <script src="../js/xlsx.full.min.js" type="text/javascript"></script> -->
+	<script src="../js/xlsx.core.min.js" type="text/javascript"></script>
+	<script src="../js/xlsxStyle.core.min.js" type="text/javascript"></script>
+    <script src="../js/xlsxStyle.utils.js" type="text/javascript"></script>
+	<script type="text/javascript">
+		new Vue({
+			el: '#shopx5',
+			data: function() {
+				let _this = this
+				return {
+					titleId: 2,
+					releaseList: {
+						data: [],
+						total: 0
+					},
+					releaseListAll: [],
+					clumnList: '',
+					value1: '',
+					value2: '',
+					fbTime: '',
+					tableFrom: {
+						Title: '', //标题
+						ColumnIName: '', //栏目名称
+						Keyword: '', //关键字
+						IssueName: '', //发布人OA账号
+						StartWriteTime: '', //撰写开始时间
+						EndWriteTime: '', //撰写结束时间
+						newsAuditType: '', // 状态
+						pageIndex: 0,
+						pageSize: 200
+					},
+					CurrentPage:1,
+					StatisticalPage:1,
+					total: 20,
+					startTime: { // 时间判断
+						disabledDate: function(time) {
+							var endDateVal = _this.tableFrom.EndWriteTime;
+							if (endDateVal) {
+								return time.getTime() > new Date(endDateVal).getTime();
+							}
+						}
+					},
+					endTime: {
+						disabledDate: function(time) {
+							var beginDateVal = _this.tableFrom.StartWriteTime
+							if (beginDateVal) {
+								return time.getTime() < new Date(beginDateVal).getTime()
+							}
+						}
+					},
+					statusList: [{
+							name: '草稿',
+							id: 0
+						},
+						{
+							name: '已提交',
+							id: 1
+						},
+						{
+							name: '通过初审',
+							id: 2
+						},
+						{
+							name: '已发布',
+							id: 3
+						},
+						// {
+						// 	name: '撤回',
+						// 	id: 4
+						// }
+					],
+					chooseLists: [],
+					form: {
+						name: '',
+						radio: '1',
+						number: '',
+						textarea: '',
+						fbTime: ''
+					},
+					groupData: '',
+					statusData: '',
+					keywords: '',
+					trialLoading: false,
+					auditLoad: false,
+					fabuLoad: false,
+					user: {
+						code: 'Category'
+					},
+					number: 0,
+					templateSelection: [], // checkbox 选中的值
+
+					// 统计报表数据源 月统计
+					statisticalFormMonth:
+					{
+						year:'',
+						month:'',
+					},
+					statisticalListMonth: {
+						
+						data: [],
+						columns: [],						
+					},
+
+
+
+					// 统计报表数据源
+					statisticalForm: {
+					    year: '',
+                        groupId: '0',
+						pageIndex: 0,
+						pageSize: 100
+					},
+					statisticalList: {
+						data: [],
+						total: 0
+					},
+					isDisabled: false, // 禁用
+					pulishPersonList: [], // 发布人数据
+					baseUrl: '../../../wt2admin/', // 请求地址url前缀
+					roleDrafter: '', // 拟稿人
+					roleFirstPerson: '', // 初审人
+					roleRecheckPerson: '', // 复审人
+					newsManager: '', // 新闻管理员
+					tableHeight: window.innerHeight - 300,
+					screenHeight: window.innerHeight - 270,
+					proptype: null,
+					order: null,
+				    groups: []
+				}
+			},
+			created: function () {
+				var that = this
+				that.getSlideshow()
+				if (that.titleId == 1) {
+					// setTimeout(function(){
+					// if (that.roleStatus == 0) {
+					// 	// 拟稿人：查询、新建、提交初审、编辑（草稿）、删除（草稿）；
+					// 	that.$nextTick(function(){
+					// 		document.getElementById('trial_by').style.display = 'none'
+					// 		document.getElementById('recall').style.display = 'none'
+					// 		document.getElementById('publish').style.display = 'none'
+					// 		document.getElementById('pulish_set').style.display = 'none'
+					// 	})
+					// } else if (that.roleStatus == 1) {
+					// 	// 初审人：查询、初审通过、编辑（已提交新闻）
+					// 	that.$nextTick(function(){
+					// 		document.getElementById('add').style.display = 'none'
+					// 		document.getElementById('first_trial').style.display = 'none'
+					// 		document.getElementById('publish').style.display = 'none'
+					// 		document.getElementById('recall').style.display = 'none'
+					// 		document.getElementById('del').style.display = 'none'
+					// 		document.getElementById('pulish_set').style.display = 'none'
+					// 	})
+					// } else if (that.roleStatus == 2){
+					// 	// 复审人：查询、发布、编辑（已提交新闻）；发布设置、撤回、删除
+					// 	 that.$nextTick(function(){
+					// 		 document.getElementById('first_trial').style.display = 'none'
+					// 		 document.getElementById('trial_by').style.display = 'none'
+					// 		 document.getElementById('pulish_set').style.display = 'block'
+					// 	 })
+					// } else if (that.roleStatus == 3){
+					// 	// 新闻管理员：栏目配置；
+					// }
+					that.getRelease()
+					that.getAllClumn()
+					// that.getPublishPerson() // 列表发布人数据源
+					that.$nextTick(function() {
+						that.getRole()
+					})
+					// },2000)
+				} else if (that.titleId == 2) {
+				    that.getGroupList()
+					console.log(new Date().getFullYear())
+					var defaultYear = new Date().getFullYear().toString()
+					that.statisticalForm.year = defaultYear
+					that.getStatisticaData()
+				}
+			},
+			mounted: function() {
+				var that = this
+				window.onresize = function() {
+					return (function() {
+						that.tableHeight = window.innerHeight - 300
+					})()
+				}
+				window.onresize = function() {
+					return (function() {
+						that.screenHeight = window.innerHeight - 270
+					})()
+				}
+			},
+			methods: {
+				sort_change: function(column) {
+					var sortColumn = ''
+					if (window.localStorage.getItem('sortColumn')) {
+						sortColumn = window.localStorage.getItem('sortColumn')
+					} else if (column) {
+						window.localStorage.setItem('sortColumn', JSON.stringify(column))
+					}
+					if (sortColumn) {
+						var list = JSON.parse(sortColumn)
+						if (column.prop !== list.prop) {
+							window.localStorage.setItem('sortColumn', JSON.stringify(column))
+						}
+					}
+					this.proptype = column.prop;
+					if (column.order === "descending") {
+						this.order = -1
+						this.releaseList.data.sort(this.sortDevName);
+					} else if (column.order === "ascending") {
+						this.order = 1
+						this.releaseList.data.sort(this.sortDevName);
+					} else {
+						// this.tableData = JSON.parse(JSON.stringify(this.allTable))             
+					}
+					// tableSort(column,this.tableData,this.allTable)        
+				},
+				sortDevName: function(str1, str2, a) {
+					let res = 0
+					str1[this.proptype] = String(str1[this.proptype])
+					str2[this.proptype] = String(str2[this.proptype])
+					if (str1[this.proptype] !== '' && str2[this.proptype] === '') {
+						return -1
+					} else if (str2[this.proptype] !== '' && str1[this.proptype] === '') {
+						return 1
+					} else {
+						for (let i = 0;; i++) {
+							if (!str1[this.proptype][i] || !str2[this.proptype][i]) {
+								res = str1[this.proptype].length - str2[this.proptype].length
+								break
+							}
+							const char1 = str1[this.proptype][i]
+							const char1Type = this.getChartType(char1)
+							const char2 = str2[this.proptype][i]
+							const char2Type = this.getChartType(char2)
+							// 类型相同的逐个比较字符                    
+							if (char1Type[0] === char2Type[0]) {
+								if (char1 === char2) {
+									continue
+								} else {
+									if (char1Type[0] === 'zh') {
+										res = char1.localeCompare(char2)
+									} else if (char1Type[0] === 'en') {
+										res = char1.charCodeAt(0) - char2.charCodeAt(0)
+									} else {
+										res = char1 - char2
+									}
+									break
+								}
+							} else {
+								// 类型不同的，直接用返回的数字相减                       
+								res = char1Type[1] - char2Type[1]
+								break
+							}
+						}
+					}
+					res = this.order * res
+					return res
+				},
+				getChartType: function(char) {
+					// 数字可按照排序的要求进行自定义，我这边产品的要求是        
+					// 数字（0->9）->大写字母（A->Z）->小写字母（a->z）->中文拼音（a->z）            
+					if (/^[\u4e00-\u9fa5]$/.test(char)) {
+						return ['zh', 300]
+					}
+					if (/^[a-zA-Z]$/.test(char)) {
+						return ['en', 200]
+					}
+					if (/^[0-9]$/.test(char)) {
+						return ['number', 100]
+					}
+					return ['others', 999]
+				},
+				//关键字字符串处理
+				getKeyWordStr: function(testStr) {
+					// var testStr = "aa/bb/cc/dd/ee/ff";
+					var re = new RegExp("(.*)，(.*)，(.*)", "ig");
+					var r = re.exec(testStr);
+					return r[1]
+				},
+				//状态选择
+				chooseTitle: function(e) {
+					this.titleId = e
+					if (this.titleId == 1) {
+						this.getStatisticaMonthData()
+					} else if (this.titleId == 2) {
+						this.getStatisticaData()
+					}
+				},
+				moments: function(item) {
+					var x1 = moment(item).format('YYYY.MM.DD')
+					return x1
+				},
+				//获取详细信息
+				getAllClumn: function() {
+					var that = this
+					request.getHttp({
+						url: 'NewsInfo/GetColumnByName',
+						type: 'get',
+					}, function(res) {
+						that.clumnList = res
+					})
+				},
+				//发布设置
+				getIssueIssue: function() {
+					var that = this
+					request.postHttp({
+						url: 'NewsInfo/IssueIssue',
+						type: 'post',
+						data: {
+							id: that.templateSelection.toString(),
+							IssueTime: that.value1
+						}
+					}, function(res) {
+						that.getMessage(res)
+					})
+				},
+				//审核
+				getAudit: function() {
+					var that = this
+					request.postHttp({
+						url: 'NewsInfo/Audit',
+						type: 'post',
+						data: {
+							Id: that.templateSelection.toString(),
+							audit: that.number, //审核类型 0=提交初审,1=初审通过，2=发布，3=撤回 
+						}
+					}, function(res) {
+						that.getMessage(res)
+					})
+				},
+				//发布
+				getPublish: function() {
+					var that = this
+					if (that.templateSelection.length == 0) {
+						that.$message('请选择要发布的数据')
+						return
+					}
+					request.postHttp({
+						url: 'NewsInfo/Publish',
+						type: 'post',
+						data: {
+							Id: that.templateSelection.toString(),
+						}
+					}, function(res) {
+						if (res.Status == 1) {
+							that.$message({
+								type: 'success',
+								message: res.Message
+							})
+							setTimeout(function() {
+								location.reload()
+							}, 2000)
+						} else if (res.Status == -1) {
+							that.$message({
+								type: 'error',
+								message: res.Message
+							})
+						}
+					})
+				},
+				// 查询方法
+				search: function(params) {
+					if (params == 'all') {
+						this.tableFrom = {
+							Title: '', //标题
+							ColumnIName: '', //栏目名称
+							Keyword: '', //关键字
+							IssueName: '', //发布人OA账号
+							StartWriteTime: '', //撰写开始时间
+							EndWriteTime: '', //撰写结束时间
+							pageIndex: 0,
+							pageSize: 10
+						}
+					}
+					if (params == 'search') {
+						this.CurrentPage = 1
+						this.tableFrom.pageIndex = 0
+					}
+					this.getRelease()
+				},
+				//审批流程弹框---- 审核类型 0=提交初审,1=初审通过，2=发布，3=撤回  ---alisa
+				submit: function(num) {
+					this.number = num
+					if (this.templateSelection.length == 0) {
+						this.$message('请选择要审核的数据')
+						return
+					}
+					if (this.number == 3 && this.isDisabled == true) {
+						return
+					}
+					this.trialLoading = true
+				},
+				closeBtn: function() {
+					this.trialLoading = false;
+				},
+				//信息发布列表 ----alisa
+				getRelease: function() {
+					var that = this
+					request.getHttp({
+						url: 'NewsInfo/Index',
+						type: 'get',
+						data: that.tableFrom
+					}, function(res) {
+						that.releaseList.data = res.data
+						that.releaseList.total = res.sumCount
+					})
+				},
+				//匹配轮播图数据 ----alisa
+				getSlideshow: function() {
+					var that = this
+					request.getHttp({
+						url: 'NewsInfo/GetSlideshow',
+						type: 'get',
+					}, function(res) {
+						that.chooseLists = res
+					})
+				},
+				//删除 ------alisa
+				delSumbit: function() {
+					var that = this
+					if (that.templateSelection.length == 0) {
+						that.$message('请选择要删除的数据')
+						return
+					}
+					var con = '确定要删除吗？'
+					layer.open({
+						content: con,
+						btn: ['确定', '取消'],
+						yes: function(index) {
+							layer.close(index);
+							request.postHttp({
+								url: 'NewsInfo/Delete',
+								type: 'post',
+								data: {
+									Id: that.templateSelection.toString()
+								}
+							}, function(res) {
+								that.getMessage(res)
+							})
+						},
+					});
+				},
+
+				//新增/编辑信息发布 --- alisa
+				goInfo: function(row) {
+					//是否是有新增栏目
+					var that = this
+					if (row == 'new') {
+						request.postHttp({
+							url: 'NewsInfo/IsFirstManOA',
+							type: 'post',
+						}, function(res) {
+							if (res.Status == 1) {
+								if (that.roleDrafter == 1) {
+									// 拟稿人（草稿）
+									if (row.Id && (row.AuditType == 0 || row.AuditType == 1 || row.AuditType == 2)) {
+										location.href = './information_stup.html?id=' + row.Id + '&status=' + that.roleDrafter + '&newsManager=' +
+											that.newsManager + '&roleRecheckPerson=' + that.roleRecheckPerson
+										localStorage.removeItem('sortColumn')
+									}
+									if (!row.Id) {
+										location.href = './information_stup.html?newstatus=new' + '&status=' + that.roleDrafter + '&newsManager=' +
+											that.newsManager + '&roleRecheckPerson=' + that.roleRecheckPerson
+										localStorage.removeItem('sortColumn')
+									}
+								}
+								if (that.roleFirstPerson == 1 && (row.AuditType == 0 || row.AuditType == 1 || row.AuditType == 2)) {
+									// 初审人（草稿，已提交，通过初审）
+									if (row.Id) {
+										location.href = './information_stup.html?id=' + row.Id + '&status=' + that.roleDrafter + '&newsManager=' +
+											that.newsManager + '&roleRecheckPerson=' + that.roleRecheckPerson
+										localStorage.removeItem('sortColumn')
+									}
+								}
+								if (that.roleRecheckPerson == 1 && (row.AuditType == 0 || row.AuditType == 1 || row.AuditType == 2)) {
+									// 复审人（草稿，已提交，通过初审）
+									if (row.Id) {
+										location.href = './information_stup.html?id=' + row.Id + '&status=' + that.roleDrafter + '&newsManager=' +
+											that.newsManager + '&roleRecheckPerson=' + that.roleRecheckPerson
+										localStorage.removeItem('sortColumn')
+									}
+								}
+								if (that.newsManager == 1 && (row.AuditType == 0 || row.AuditType == 1 || row.AuditType == 2 || row.AuditType ==
+										3)) {
+									// 新闻管理员（任何状态）
+									if (row.Id) {
+										location.href = './information_stup.html?id=' + row.Id + '&status=' + that.roleDrafter + '&newsManager=' +
+											that.newsManager + '&roleRecheckPerson=' + that.roleRecheckPerson
+										localStorage.removeItem('sortColumn')
+									}
+								}
+								if (that.roleDrafter == 1 && row.AuditType == 3) {
+									that.$message({
+										type: 'warning',
+										message: '拟稿人可以编辑草稿,已提交，通过初审，初审人可以编辑草稿，已提交，通过初审，复审人可以编辑草稿，已提交，通过初审，新闻管理员可以编辑任何状态！'
+									})
+								} else if (that.roleFirstPerson == 1 && row.AuditType == 3) {
+									that.$message({
+										type: 'warning',
+										message: '拟稿人可以编辑草稿,已提交，通过初审，初审人可以编辑草稿，已提交，通过初审，复审人可以编辑草稿，已提交，通过初审，新闻管理员可以编辑任何状态！'
+									})
+								} else if (that.roleRecheckPerson == 1 && row.AuditType == 3) {
+									that.$message({
+										type: 'warning',
+										message: '拟稿人可以编辑草稿,已提交，通过初审，初审人可以编辑草稿，已提交，通过初审，复审人可以编辑草稿，已提交，通过初审，新闻管理员可以编辑任何状态！'
+									})
+								}
+							} else {
+								that.$message({
+									type: 'error',
+									message: res.Message
+								})
+							}
+						})
+
+					} else {
+
+						if (that.roleDrafter == 1) {
+							// 拟稿人（草稿）
+							if (row.Id && (row.AuditType == 0 || row.AuditType == 1 || row.AuditType == 2)) {
+								location.href = './information_stup.html?id=' + row.Id + '&status=' + that.roleDrafter + '&newsManager=' +
+									that.newsManager + '&roleRecheckPerson=' + that.roleRecheckPerson
+								localStorage.removeItem('sortColumn')
+							}
+							if (!row.Id) {
+								location.href = './information_stup.html'
+								localStorage.removeItem('sortColumn')
+							}
+						}
+						if (that.roleFirstPerson == 1 && (row.AuditType == 0 || row.AuditType == 1 || row.AuditType == 2)) {
+							// 初审人（草稿，已提交，通过初审）
+							if (row.Id) {
+								location.href = './information_stup.html?id=' + row.Id + '&status=' + that.roleDrafter + '&newsManager=' +
+									that.newsManager + '&roleRecheckPerson=' + that.roleRecheckPerson
+								localStorage.removeItem('sortColumn')
+							}
+						}
+						if (that.roleRecheckPerson == 1 && (row.AuditType == 0 || row.AuditType == 1 || row.AuditType == 2)) {
+							// 复审人（草稿，已提交，通过初审）
+							if (row.Id) {
+								location.href = './information_stup.html?id=' + row.Id + '&status=' + that.roleDrafter + '&newsManager=' +
+									that.newsManager + '&roleRecheckPerson=' + that.roleRecheckPerson
+								localStorage.removeItem('sortColumn')
+							}
+						}
+						if (that.newsManager == 1 && (row.AuditType == 0 || row.AuditType == 1 || row.AuditType == 2 || row.AuditType ==
+								3)) {
+							// 新闻管理员（任何状态）
+							if (row.Id) {
+								location.href = './information_stup.html?id=' + row.Id + '&status=' + that.roleDrafter + '&newsManager=' +
+									that.newsManager + '&roleRecheckPerson=' + that.roleRecheckPerson
+								localStorage.removeItem('sortColumn')
+							}
+						}
+						if (that.roleDrafter == 1 && row.AuditType == 3) {
+							that.$message({
+								type: 'warning',
+								message: '拟稿人可以编辑草稿,已提交，通过初审，初审人可以编辑草稿，已提交，通过初审，复审人可以编辑草稿，已提交，通过初审，新闻管理员可以编辑任何状态！'
+							})
+						} else if (that.roleFirstPerson == 1 && row.AuditType == 3) {
+							that.$message({
+								type: 'warning',
+								message: '拟稿人可以编辑草稿,已提交，通过初审，初审人可以编辑草稿，已提交，通过初审，复审人可以编辑草稿，已提交，通过初审，新闻管理员可以编辑任何状态！'
+							})
+						} else if (that.roleRecheckPerson == 1 && row.AuditType == 3) {
+							that.$message({
+								type: 'warning',
+								message: '拟稿人可以编辑草稿,已提交，通过初审，初审人可以编辑草稿，已提交，通过初审，复审人可以编辑草稿，已提交，通过初审，新闻管理员可以编辑任何状态！'
+							})
+						}
+					}
+
+				},
+				// -----alisa
+				// 发布设置日期获取
+				handleDateChange: function() {
+					if (this.templateSelection.length == 0) {
+						this.$message('请选择要操作的数据')
+						this.value1 = ''
+						return
+					}
+					this.getIssueIssue()
+				},
+				// 信息发布每页
+				handleSizeChange: function(val) {
+					this.tableFrom.pageSize = val
+					this.CurrentPage = 1
+					this.tableFrom.pageIndex = 0
+					this.getRelease()
+					if (window.localStorage.getItem('sortColumn')) {
+						var sortList = JSON.parse(window.localStorage.getItem('sortColumn'))
+						this.sort_change(sortList)
+					}
+				},
+				// 信息发布当前页面
+				handleCurrentChange: function(val) {
+					this.tableFrom.pageIndex = val - 1
+					this.CurrentPage = val
+					this.getRelease()
+					if (window.localStorage.getItem('sortColumn')) {
+						var sortList = JSON.parse(window.localStorage.getItem('sortColumn'))
+						this.sort_change(sortList)
+					}
+				},
+				// checkBox选中获取数据
+				checkBoxChange: function(val) {
+					if (this.templateSelection.indexOf(val.Id) > -1) {
+						this.templateSelection = []
+						this.templateSelection.push(val.Id)
+					}
+				},
+				// 请求接口返回的信息
+				getMessage: function(res) {
+					if (res.Status == 1) {
+						this.$message({
+							type: 'success',
+							message: res.Message
+						})
+						setTimeout(function() {
+							location.reload()
+						}, 500)
+					} else if (res.Status == -1) {
+						this.$message({
+							type: 'error',
+							message: res.Message
+						})
+					}
+				},
+				// 标题是样式设置
+				cellStyle: function(
+					row,
+					column,
+					rowIndex,
+					columnIndex
+				) {
+					if (columnIndex === 2) {
+						return {
+							'color': 'rgba(24, 144, 255, 1)',
+							'cursor': 'pointer'
+						}
+					}
+				},
+				// 点击标题跳转到详情
+				handlTitleCell: function(row, column, cell, event) {
+					var that = this
+					if (column.property === 'Title') {
+						location.href = 'new_detail.html?id=' + row.Id + '&status=' + row.AuditType + '&drafter=' + that.roleDrafter +
+							'&first=' + that.roleFirstPerson + '&recheck=' + that.roleRecheckPerson + '&newsManager=' + that.newsManager
+						localStorage.removeItem('sortColumn')
+					}
+				},
+				// 统计报表 月统计  
+				getStatisticaMonthData:function(){
+
+					var that = this
+					
+					if(that.statisticalFormMonth.year==''||that.statisticalFormMonth.month=='')
+					{
+					return	
+					}
+
+					request.getHttp({
+						url: 'NewsInfo/InfoByColumnId',
+						type: 'get',
+						data: that.statisticalFormMonth
+					}, function(res) {						
+						
+						var povitList = eval(res);
+
+						for(var i=0;i<povitList.length;i++)
+						{
+							var item = povitList[i];
+							delete item['UserName'];
+							delete item['OrgName'];
+							delete item['orgid'];
+						}
+						let columnKeys = [];
+						for (var key in povitList[0]) {
+							columnKeys.push({value:key, label:key });
+						}
+
+						for(var i=0;i<povitList.length;i++)
+						{
+							var item = povitList[i];
+							for(var j=0;j<columnKeys.length;j++)
+							{
+								var columnKey=columnKeys[j].value;
+								if(item[columnKey] == null)
+								{
+									if(columnKey=='单位'||columnKey=='姓名')
+									item[columnKey]=''									
+									else
+									item[columnKey]=0
+								}
+							}
+
+						}
+
+						that.statisticalListMonth.data = povitList
+						that.statisticalListMonth.data.columns=columnKeys
+					},true)
+
+				},
+				// 统计报表
+				getStatisticaData: function(parme) {
+					var that = this
+					if(parme == 'search'){
+						that.StatisticalPage = 1
+						that.statisticalForm.pageIndex = 0
+					}
+					request.getHttp({
+						url: 'NewsInfo/InfoCount',
+						type: 'get',
+						data: that.statisticalForm
+					}, function(res) {
+						that.statisticalList.data = res.Items
+						that.statisticalList.total = res.TotalCount
+					},true)
+				},
+				// 统计报表发布每页
+				handleStatisticalSizeChange: function(val) {
+					this.statisticalForm.pageSize = val
+					this.StatisticalPage = 1
+					this.statisticalForm.pageIndex = 0
+					this.getStatisticaData()
+				},
+				// 统计报表发布当前页面
+				handleStatisticalCurrentChange: function(val) {
+					this.statisticalForm.pageIndex = val - 1
+					this.StatisticalPage = val
+					this.getStatisticaData()
+				},
+				// 获取权限
+				getRole: function() {
+					var that = this
+					$.ajax({
+						url: this.baseUrl + 'NewsInfo/WorkName',
+						type: 'get',
+						cache: false, //是否缓存
+						async: false, //同步
+						xhrFields: {
+							withCredentials: true // 这里设置了withCredentials
+						},
+						crossDomain: true, //允许跨域
+						success: function(res) {
+							that.roleDrafter = res.Drafter; // 拟稿人
+							that.roleFirstPerson = res.First; // 初审人
+							that.roleRecheckPerson = res.Recheck; // 复审人
+							that.newsManager = res.NewsManager; // 新闻管理员
+							if (res.Drafter == 0 && res.First == 0 && res.Recheck == 0 && res.NewsManager == 0) {
+								that.$message({
+									type: 'warning',
+									message: res
+								})
+								document.getElementById('shopx5').style.display = 'none'
+							} else {
+								document.getElementById('shopx5').style.display = 'block'
+
+							}
+						}
+					})
+				},
+				// 获取发布人
+				getPublishPerson: function() {
+					var that = this
+					request.getHttp({
+						url: 'NewsInfo/GetIssueByName',
+						type: 'get',
+						data: ''
+					}, function(res) {
+						that.pulishPersonList = res
+					})
+				},
+				// 统计报表导出
+				statisticaExport: function() {
+					if (this.statisticalList.data.length == 0) {
+						this.$message({
+							type: 'warning',
+							message: '暂无导出数据！'
+						})
+						return false
+					}
+					let tableData = [
+                        ['幸福网厅新闻中心投稿汇总表'],
+						['序号','单位', '姓名', '一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月', '总计']
+					] // 表格表头
+					this.statisticalList.data.forEach(function(item) {
+						let rowData = []
+						rowData = [
+							item.listCount,
+							item.OrgName,
+							item.UserName,
+							item.Month1,
+							item.Month2,
+							item.Month3,
+							item.Month4,
+							item.Month5,
+							item.Month6,
+							item.Month7,
+							item.Month8,
+							item.Month9,
+							item.Month10,
+							item.Month11,
+							item.Month12,
+							item.MonthSum
+						]
+						tableData.push(rowData)
+					})
+					let ws = XLSX.utils.aoa_to_sheet(tableData);
+					let wb = XLSX.utils.book_new();
+//遍历每个格子
+
+		for(const key in ws) {
+		//给每个格子修改样式
+			ws[key].s = {
+			  border: {//添加边框
+			    bottom: {
+			      style: 'thin',
+			      color: '000000'
+			    },
+			    left: {
+			      style: 'thin',
+			      color: '000000'
+			    },
+			    right: {
+			      style: 'thin',
+			      color: '000000'
+			    },
+			    top: {
+			      style: 'thin',
+			      color: '000000'
+			    }
+			  },
+			  //字体水平居中、垂直居中、自动换行、缩进
+			  alignment:{
+			    horizontal:'center', //水平居中
+			    vertical: 'center',
+			    wrapText: 1,
+			    indent: 0
+			  },
+			  //字体类型、大小、是否加粗
+			  font: {//字体
+			    name: '等线',
+			    sz: 9,
+			    bold: false
+			  }
+			}
+			//给特定格子（带'1'的，即首行 标题）添加样式，下面同理
+			if (key.indexOf('B') != -1 && key != 'B1') 
+			 {
+			  ws[key].s = {
+			    ...ws[key].s,
+			   alignment:{
+			    horizontal:'left', //
+			    vertical: 'center',
+			    wrapText: 1,
+			    indent: 0
+			  },
+			  }
+			}
+
+			if (key.replace(/[^0-9]/ig, '') === '1')
+			{
+			  ws[key].s = {
+			    ...ws[key].s,
+			    fill: { //背景色
+			      fgColor: { rgb: 'EBF1DE' }
+			    },
+			    font: {//覆盖字体
+			      name: '等线',
+			      sz: 10,
+			      bold: true
+			    },
+			  }
+			}
+			//给特定格子（带'1'的，即首行 标题）添加样式，下面同理
+			if (key.replace(/[^0-9]/ig, '') === '2') {
+			  ws[key].s = {
+			    ...ws[key].s,
+			    fill: { //背景色
+			      fgColor: { rgb: 'EBF1DE' }
+			    },
+			    font: {//覆盖字体
+			      name: '等线',
+			      sz: 10,
+			      bold: true
+			    },
+			  }
+			}
+			if (key === 'A1') {
+			  ws[key].s = {
+			    ...ws[key].s,
+			    fill: { //背景色
+			      fgColor: { rgb: 'E4DFEC' }
+			    }
+			  }
+			}
+			if (key === 'C1' || key === 'D1' || key === 'E1' || key === 'F1' || key === 'G1' || key === 'H1' ) {
+			  ws[key].s = {
+			    ...ws[key].s,
+			    fill: { //背景色
+			      fgColor: { rgb: 'FDE9D9' }
+			    }
+			  }
+			}
+		}
+		//列宽
+		let colsP = [
+			{
+			  'wch' : 4.11 //A
+			},
+			{
+			  'wch' : 12.67//B
+			},
+			{
+			  'wch' : 8.11//C
+			},
+			{
+			  'wch' : 8.11//D
+			},
+			{
+			  'wch' : 8.11//E
+			},
+			{
+			  'wch' : 6.78//F
+			},
+			{
+			  'wch' : 8.11//G
+			},
+			{
+			  'wch' : 8.11//H
+			},
+		]
+		ws['!cols'] = colsP;
+        ws["!merges"] = [{ s: { c: 0, r: 0 }, e: { c: 15, r: 0 } }]; 
+        let excelName = '统计报表.xlsx' //excel文件名
+		this.openDownload(this.sheet2blob(ws,'统计报表明细'), excelName);
+	
+				},
+				
+				sheet2blob(sheet, sheetName) {
+     let wb = XLSX.utils.book_new()
+     wb.SheetNames.push(sheetName)
+     wb.Sheets[sheetName] = sheet
+     var wbout = xlsxStyle.write(wb, { bookType: '', bookSST: false, type: 'binary' })
+     var blob = new Blob([s2ab(wbout)], { type: "" },sheetName)
+     // 字符串转ArrayBuffer
+     function s2ab(s) {
+       var buf = new ArrayBuffer(s.length)
+       var view = new Uint8Array(buf)
+       for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xff
+       return buf
+     }
+     return blob
+   },
+   //导出excel辅助函数
+   openDownload(url, saveName) {
+     if (typeof url == "object" && url instanceof Blob) {
+       url = URL.createObjectURL(url) // 创建blob地址
+     }
+     var aLink = document.createElement("a")
+     aLink.href = url
+     aLink.download = saveName || ""; // HTML5新增的属性，指定保存文件名，可以不要后缀，注意，file:///模式下不会生效
+     var event
+     if (window.MouseEvent) event = new MouseEvent("click")
+     else {
+       event = document.createEvent("MouseEvents")
+       event.initMouseEvent("click",true,false,window,0,0,0,0,0,false,false,false,false,0,null)
+     }
+     aLink.dispatchEvent(event);
+   },
+				statisticaExportMonth: function() {
+					if (this.statisticalListMonth.data.length == 0) {
+						this.$message({
+							type: 'warning',
+							message: '暂无导出数据！'
+						})
+						return false
+					}
+
+				var cItems=	this.statisticalListMonth.data.columns.map(function(item){return item.value})
+					let tableData = [
+					cItems
+					]
+					 // 表格表头
+					this.statisticalListMonth.data.forEach(function(item) {
+
+						let rowData = []
+						for(var i=0; i<cItems.length; i++)
+						{
+						var columnName = cItems[i];
+						rowData.push(item[columnName]);					
+						}
+						tableData.push(rowData)
+					})
+					let ws = XLSX.utils.aoa_to_sheet(tableData)
+					let wb = XLSX.utils.book_new()
+					XLSX.utils.book_append_sheet(wb, ws, '统计报表') // 工作簿名称
+					XLSX.writeFile(wb, '统计报表.xlsx') // 保存的文件名
+				},
+				getGroupList: function () {
+				    var _this = this
+				    request.getHttp({
+				        url: 'NewsRoleConfigure/ClassGroupList',
+				        type: 'get',
+				        data: {
+				        }
+				    }, function (res) {
+				        _this.groups = res.data
+				    })
+				},
+				changeGroup(val) {
+				    let that = this
+				    that.groupId = val;
+				    that.getStatisticaData()
+				}
+			}
+		})
+	</script>
+</html>
